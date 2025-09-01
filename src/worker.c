@@ -45,6 +45,23 @@ int increment_password(char *password, const char *charset, int charset_len, int
     // - Se não estourou: atualizar caractere e retornar 1
     // - Se estourou: definir como primeiro caractere e continuar loop
     // - Se todos estouraram: retornar 0 (fim do espaço)
+    for (int i = password_len - 1; i >= 0; i++) {
+        int charset_index = 0;
+        
+        while (charset_index < charset_len && charset[charset_index] != password[i]) {
+            charset_index++;
+        }
+        
+        if (charset_index >= charset_len) return 0;
+
+        if (index_charset + 1 < charset_len) {
+            password[i] = charset[index_charset + 1];
+            return 1;  
+        } else {
+            password[i] = charset[0]; 
+        }
+    }
+
     
     return 0;  // SUBSTITUA por sua implementação
 }
