@@ -67,6 +67,10 @@ int main(int argc, char *argv[]) {
     // Se não, imprimir mensagem de uso e sair com código 1
     
     // IMPLEMENTE AQUI: verificação de argc e mensagem de erro
+    if (argc != 5){
+        fprintf(stderr, "%s Erro: sao necessarios 5 argumentos. Quantidade de argumentos recebidos: %d\n", argv[0], argc);
+        return 1;
+    }
     
     // Parsing dos argumentos (após validação)
     const char *target_hash = argv[1];
@@ -79,6 +83,21 @@ int main(int argc, char *argv[]) {
     // - password_len deve estar entre 1 e 10
     // - num_workers deve estar entre 1 e MAX_WORKERS
     // - charset não pode ser vazio
+
+    if (password_len < 1 || password_len > 10){
+        fprintf(stderr, "Erro: Tamanho da senha deve estar entre 1 e 10. Tamanho recebido: %d\n", password_len);
+        return 1;
+    }
+
+    if (num_workers < 1 || num_workers > MAX_WORKERS){
+        fprintf(stderr, "Erro: Numero de workers deve estar entre 1 e %d. Workers recebidos: %d", MAX_WORKERS, num_workers);
+        return 1;
+    }
+
+    if(charset_len <= 0 || strcmp(charset, "") != 0){
+        fprintf(stderr, "Erro: charset nao pode estar vazio.");
+        return 1;
+    }
     
     printf("=== Mini-Projeto 1: Quebra de Senhas Paralelo ===\n");
     printf("Hash MD5 alvo: %s\n", target_hash);
