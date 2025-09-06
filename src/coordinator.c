@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
         long long start_interval;
         long long end_interval;
         
+        /* falta distribuir o resto */
         if (i == 0){
             start_interval = 0;
             end_interval = passwords_per_worker;
@@ -159,6 +160,19 @@ int main(int argc, char *argv[]) {
         // TODO 5: No processo pai: armazenar PID
         // TODO 6: No processo filho: usar execl() para executar worker
         // TODO 7: Tratar erros de fork() e execl()
+        if (pid < 0){
+            fprintf(stderr, "Erro: falha no fork.\n");
+            return 1;
+        }
+        else if(pid == 0){
+            execl("./worker", target_hash, start, end, charset, password_len, i + 1);
+            perror("Error no execl");   
+            exit(1);
+        }
+        else (pid > 0){
+            workers[i] = pid;
+        }
+        
     }
     
     printf("\nTodos os workers foram iniciados. Aguardando conclusão...\n");
@@ -172,6 +186,18 @@ int main(int argc, char *argv[]) {
     // - Identificar qual worker terminou
     // - Verificar se terminou normalmente ou com erro
     // - Contar quantos workers terminaram
+    int count = 0;
+
+    for (int i = 0; i < num_workers; i++){
+        int status;
+        waitpid(workers[i], &status, 0);
+        if (WIFEXITED(status)){
+            printf("Worker %d, com PID %d terminou com código %d\n", i + 1, workers[i], WEXITSTATUS(status));
+            count++;
+        }
+    }
+    printf("%d/%d workers terminaram.\n", count, num_workers);
+    
     
     // Registrar tempo de fim
     time_t end_time = time(NULL);
