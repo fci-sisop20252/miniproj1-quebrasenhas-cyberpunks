@@ -168,8 +168,8 @@ int main(int argc, char *argv[]) {
             execl("./worker", target_hash, start, end, charset, password_len, i + 1);
             perror("Error no execl");   
             exit(1);
-        }
-        else (pid > 0){
+        } 
+        else {
             workers[i] = pid;
         }
         
