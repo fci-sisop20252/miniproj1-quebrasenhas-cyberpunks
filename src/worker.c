@@ -54,16 +54,15 @@ int increment_password(char *password, const char *charset, int charset_len, int
         
         if (charset_index >= charset_len) return 0;
 
-        if (index_charset + 1 < charset_len) {
-            password[i] = charset[index_charset + 1];
+        if (charset_index + 1 < charset_len) {
+            password[i] = charset[charset_index + 1];
             return 1;  
         } else {
             password[i] = charset[0]; 
         }
     }
 
-    
-    return 0;  // SUBSTITUA por sua implementação
+    return 0;  
 }
 
 /**
@@ -97,6 +96,17 @@ void save_result(int worker_id, const char *password) {
     // - Tentar abrir arquivo com O_CREAT | O_EXCL | O_WRONLY
     // - Se sucesso: escrever resultado e fechar
     // - Se falhou: outro worker já encontrou
+    int fd = open("password_found.txt", O_CREAT | O_EXCL | O_WRONLY, 0644);
+
+    if (fd >= 0) {
+        char buffer[100];
+        int len = snprintf(buffer, sizeof(buffer), "%d:%s\n", worker_id, password);
+        write(fd, buffer, len);
+        close(fd);
+    }
+    else {
+        printf("Senha já encontrada\n");
+    }
 }
 
 /**
