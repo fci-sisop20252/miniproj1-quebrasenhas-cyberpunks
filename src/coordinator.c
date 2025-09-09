@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     
     // IMPLEMENTE AQUI: verificação de argc e mensagem de erro
     if (argc != 5){
-        fprintf(stderr, "%s Erro: sao necessarios 5 argumentos. Quantidade de argumentos recebidos: %d\n", argv[0], argc);
+        fprintf(stderr, "Uso: %s <hash_md5> <tamanho> <charset> <num_workers>\n", argv[0]);
         return 1;
     }
     
@@ -94,10 +94,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if(charset_len <= 0 || strcmp(charset, "") != 0){
-        fprintf(stderr, "Erro: charset nao pode estar vazio.");
-        return 1;
+    if (charset_len == 0) {
+    fprintf(stderr, "Erro: charset nao pode estar vazio.\n");
+    return 1;
     }
+
     
     printf("=== Mini-Projeto 1: Quebra de Senhas Paralelo ===\n");
     printf("Hash MD5 alvo: %s\n", target_hash);
@@ -165,7 +166,12 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         else if(pid == 0){
-            execl("./worker", target_hash, start, end, charset, password_len, i + 1);
+            char len_str[8], id_str[8];
+            snprintf(len_str, sizeof(len_str), "%d", password_len);
+            snprintf(id_str, sizeof(id_str), "%d", i + 1);
+
+            execl("./worker", "worker", target_hash, start, end, charset, len_str, id_str, (char*)NULL);
+
             perror("Error no execl");   
             exit(1);
         } 
@@ -205,15 +211,36 @@ int main(int argc, char *argv[]) {
     
     printf("\n=== Resultado ===\n");
     
-    // TODO 9: Verificar se algum worker encontrou a senha
+        // TODO 9: Verificar se algum worker encontrou a senha
     // Ler o arquivo password_found.txt se existir
     
     // IMPLEMENTE AQUI:
     // - Abrir arquivo RESULT_FILE para leitura
     // - Ler conteúdo do arquivo
     // - Fazer parse do formato "worker_id:password"
-    // - Verificar o hash usando md5_string()
-    // - Exibir resultado encontrado
+    // - Exibir resultado encontrado (Senha: <senha>)
+    // - Caso o arquivo não exista, imprimir "Senha nao encontrada"
+    if (access(RESULT_FILE, F_OK) == 0) {
+        int fd = open(RESULT_FILE, O_RDONLY);
+        if (fd >= 0) {
+            char buf[256];
+            ssize_t n = read(fd, buf, sizeof(buf) - 1);
+            close(fd);
+            if (n > 0) {
+                buf[n] = '\0';
+                char *colon = strchr(buf, ':');
+                if (colon) {
+                    *colon = '\0';              // separa worker_id
+                    char *pwd = colon + 1;      // senha depois dos dois pontos
+                    char *nl = strchr(pwd, '\n');
+                    if (nl) *nl = '\0';         // remove newline
+                    printf("Senha: %s\n", pwd);
+                }
+            }
+        }
+    } else {
+        printf("Senha nao encontrada\n");
+    }
     
     // Estatísticas finais (opcional)
     // TODO: Calcular e exibir estatísticas de performance
