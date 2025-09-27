@@ -124,6 +124,9 @@ int main(int argc, char *argv[]) {
     long long passwords_per_worker = total_space/num_workers;
     long long remaining = total_space % num_workers;
     
+    long long remaining_per_worker = remaining/num_workers;
+    long long remaining_of_remaining = remaining%num_workers;
+    
     // Arrays para armazenar PIDs dos workers
     pid_t workers[MAX_WORKERS];
     
@@ -137,14 +140,18 @@ int main(int argc, char *argv[]) {
         long long start_interval;
         long long end_interval;
         
-        /* falta distribuir o resto */
+        
         if (i == 0){
             start_interval = 0;
             end_interval = passwords_per_worker;
         }
+        else if (i == num_workers -1){
+            start_interval = (passwords_per_worker * i) + 1;
+            end_interval = passwords_per_worker * (i+1) + remaining_per_worker + remaining_of_remaining;
+        }
         else {
             start_interval = (passwords_per_worker * i) + 1;
-            end_interval = passwords_per_worker * (i+1);
+            end_interval = passwords_per_worker * (i+1) + remaining_per_worker;
         }
         
         char start[password_len + 1];

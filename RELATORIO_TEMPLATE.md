@@ -1,6 +1,6 @@
 # Relatório: Mini-Projeto 1 - Quebra-Senhas Paralelo
 
-**Aluno(s):** Nome (Matrícula), Nome (Matrícula),,,  
+**Aluno(s):** Carlos Eduardo Diniz de Almeida 10444407, Nome (Matrícula),,,  
 ---
 
 ## 1. Estratégia de Paralelização
