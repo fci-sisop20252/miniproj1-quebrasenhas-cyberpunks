@@ -113,7 +113,8 @@ Não, o speedup não foi linear. No primeiro caso mais curto, o overhead de cria
 
 ## 5. Desafios e Aprendizados
 **Qual foi o maior desafio técnico que você enfrentou?**
-[Descreva um problema e como resolveu. Ex: "Tive dificuldade com o incremento de senha, mas resolvi tratando-o como um contador em base variável"]
+
+O resto não estava distribuído entre os workers. Para resolver isso, dividimos o resto pela quantidade de workers, que retornava o valor restante que cada worker iria ficar. E caso, ainda assim, restasse, o último worker ficaria responsável com essa parte.
 
 ---
 
