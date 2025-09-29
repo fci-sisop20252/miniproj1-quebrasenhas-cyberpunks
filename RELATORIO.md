@@ -10,11 +10,12 @@ Lucas Distretti Claudio (10410094)
 
 **Como você dividiu o espaço de busca entre os workers?**
 
-[Explique seu algoritmo de divisão]
+Primeiramente foi necessário conseguir o espaço de busca total. A partir disso, foi necessário dividir esse espaço de busca total pela quantidade de workers, no qual, retornava o espaço de busca de cada worker.
 
 **Código relevante:** Cole aqui a parte do coordinator.c onde você calcula a divisão:
 ```c
-// Cole seu código de divisão aqui
+long long passwords_per_worker = total_space/num_workers;
+long long remaining = total_space % num_workers;
 ```
 
 ---
@@ -23,11 +24,60 @@ Lucas Distretti Claudio (10410094)
 
 **Descreva como você usou fork(), execl() e wait() no coordinator:**
 
-[Explique em um parágrafo como você criou os processos, passou argumentos e esperou pela conclusão]
+Depois de ter calculado o intervalo de busca, dentro do for, foi necessário executar os fork(). O filho ia para a função exec(), e o pai armazenava o pid no vetor de workers. Por fim, o wait esperava todos os workers em que o pai armazenou no vetor de workers.
 
 **Código do fork/exec:**
 ```c
-// Cole aqui seu loop de criação de workers
+for (int i = 0; i < num_workers; i++) {
+        
+        long long start_interval;
+        long long end_interval;
+        
+        
+        if (i == 0){
+            start_interval = 0;
+            end_interval = passwords_per_worker;
+        }
+        else if (i == num_workers -1){
+            start_interval = (passwords_per_worker * i) + 1;
+            end_interval = passwords_per_worker * (i+1) + remaining_per_worker + remaining_of_remaining;
+        }
+        else {
+            start_interval = (passwords_per_worker * i) + 1;
+            end_interval = passwords_per_worker * (i+1) + remaining_per_worker;
+        }
+        
+        char start[password_len + 1];
+        index_to_password(start_interval, charset, charset_len, password_len, start);
+        start[password_len] = '\0';
+
+        char end[password_len + 1];
+        index_to_password(end_interval, charset, charset_len, password_len, end);
+        end[password_len] = '\0';
+
+        
+        pid_t pid = fork();
+        
+        
+        if (pid < 0){
+            fprintf(stderr, "Erro: falha no fork.\n");
+            return 1;
+        }
+        else if(pid == 0){
+            char len_str[8], id_str[8];
+            snprintf(len_str, sizeof(len_str), "%d", password_len);
+            snprintf(id_str, sizeof(id_str), "%d", i + 1);
+
+            execl("./worker", "worker", target_hash, start, end, charset, len_str, id_str, (char*)NULL);
+
+            perror("Error no execl");   
+            exit(1);
+        } 
+        else {
+            workers[i] = pid;
+        }
+        
+    }
 ```
 
 ---
@@ -86,4 +136,4 @@ time ./coordinator "5d41402abc4b2a76b9719d911017c592" 5 "abcdefghijklmnopqrstuvw
 - [x] Código compila sem erros
 - [x] Todos os TODOs foram implementados
 - [x] Testes passam no `./tests/simple_test.sh`
-- [ ] Relatório preenchido
+- [x] Relatório preenchido
